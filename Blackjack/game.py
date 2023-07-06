@@ -19,6 +19,23 @@ class Game():
 
         self.deck = Deck(numDecks)
 
+        self.analysis_df = {
+            'playerCard1': [],
+            'playerCard2': [],
+            'playerCard3': [],
+            'playerCard4': [],
+            'playerCard5': [],
+            'dealerCard1': [],
+            'dealerCard2': [],
+            'dealerCard3': [],
+            'dealerCard4': [],
+            'dealerCard5': [],
+            'playerHandSum': [],
+            'dealerHandSum': [],
+            'cardsLeft': [],
+            'result': [],
+        }
+
     def game_loop(self, net, draw:bool=False, ai:bool=True) -> int:
         """ 
         Executes a single hand of black jack
@@ -33,8 +50,6 @@ class Game():
 
         self.deck.check_deck_size()
         self.betAmount = self.startingBetAmount * ((self.playerWins+1)/(self.gamesPlayed+1))
-
-        fitnessMultiplyer = 1
 
         if draw:
             print(f'You have ${self.player1.playerBalance}')
@@ -65,13 +80,16 @@ class Game():
             inputs = (self.player1.handSum, self.dealer.handValues[0],self.betAmount)
             output = net.activate(inputs)
             decision = output.index(max(output))
+            
+            if self.player1.handSum < 12:
+                if output[0] < output[1]: decision = 0
+                else: decision = 1
 
-            if decision == 0:
+            if decision == 0 and len(self.player1.hand) == 2:
                 self.handle_double_down(draw)
-                fitnessMultiplyer = 2
 
-            elif decision == 1:
-                while decision == 1:
+            elif decision == 1 or self.player1.handSum < 12:
+                while decision == 1 or self.player1.handSum < 12:
                     decision = self.handle_ai_hit(net,draw)
                 
 
@@ -85,15 +103,35 @@ class Game():
 
         self.update_stats(result, draw, ai)
 
+        self.add_results(result)
+
         self.player1.reset_hand()
         self.dealer.reset_hand()
 
         if result == 'Loss':
-            return -self.betAmount * fitnessMultiplyer
+            return -self.betAmount
         elif result == 'Win':
-            return self.betAmount * fitnessMultiplyer
+            return self.betAmount
         else:
-            return 0
+            return self.betAmount * 0.5
+
+    def add_results(self, result) -> None:
+        for i in range(5):
+            player_column = 'playerCard' + str(i+1)
+            dealer_column = 'dealerCard' + str(i+1)
+            try:
+                self.analysis_df[player_column].append(str(self.player1.handValues[i]))
+            except:
+                self.analysis_df[player_column].append(0)
+
+            try:
+                self.analysis_df[dealer_column].append(str(self.dealer.handValues[i]))
+            except:
+                self.analysis_df[dealer_column].append(0)
+        self.analysis_df['playerHandSum'].append(self.player1.handSum)
+        self.analysis_df['dealerHandSum'].append(self.dealer.handSum)
+        self.analysis_df['cardsLeft'].append(len(self.deck.cardStack))
+        self.analysis_df['result'].append(result)
 
     def handle_player_hit(self, dealer:bool, draw:bool) -> None:
         '''Handle Player Hit'''

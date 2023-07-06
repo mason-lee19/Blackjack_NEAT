@@ -4,17 +4,18 @@ import pickle
 import neat
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 STARTING_BALANCE = 10000
-NUMBER_OF_DECKS = 4
+NUMBER_OF_DECKS = 8
 BET_AMOUNT = 100
-GAMES_PER_CHILD = 50
+GAMES_PER_CHILD = 100
 
 # If you want the Game drawn when AI is playing
 DRAW_AI_GAME = False
 
 # AI_RUN = True: Trains NEAT algorithm and has the bot play
-# AI_RUN = False: Lets user play blackjack against dealer
+# AI_RUN = False: Lets either user play
 AI_RUN = True
 
 GENOME_RESULTS = []
@@ -28,6 +29,7 @@ class BlackJackGame:
         return self.game.game_loop(net, drawGame, AI_RUN)
 
 def eval_genomes(genomes, config):
+    results = pd.DataFrame()
     allGenomeFitness = []
     resultingBalance = []
     for genome_id, genome in genomes:
@@ -37,32 +39,39 @@ def eval_genomes(genomes, config):
         for i in range(GAMES_PER_CHILD):
             fitness += newGame.play_hand(net, DRAW_AI_GAME, AI_RUN)
 
+        #temp_df = pd.DataFrame.from_dict(newGame.game.analysis_df)
+        #results = pd.concat([results,temp_df],ignore_index=True)
+
         genome.fitness = fitness
 
         allGenomeFitness.append(genome.fitness)
         resultingBalance.append(newGame.game.player1.playerBalance)
     
+    #results.to_csv('output.csv',index=False)
+    
     genomeStd = np.std(allGenomeFitness)
     genomeAvg = sum(allGenomeFitness)/len(allGenomeFitness)
+    genomeMax = max(allGenomeFitness)
     avgBalance = sum(resultingBalance)/len(resultingBalance)
     maxBalance = max(resultingBalance)
     minBalance = min(resultingBalance)
 
-    GENOME_RESULTS.append([genomeAvg,genomeStd,avgBalance,maxBalance,minBalance])
+    GENOME_RESULTS.append([genomeAvg,genomeMax,genomeStd,avgBalance,maxBalance,minBalance])
     plt.figure(figsize=(10,10))
     plt.subplot(3,1,1)
-    plt.plot(plot_data(GENOME_RESULTS,0),label="Avg Genome Fitness")
+    plt.plot(plot_data(GENOME_RESULTS,0),label='Avg Genome Fitness')
+    plt.plot(plot_data(GENOME_RESULTS,1),label='Max Genome Fitness')
     plt.ylabel("Fitness")
     plt.title("Population Fitness Over Generations")
     plt.legend()
     plt.subplot(3,1,2)
-    plt.plot(plot_data(GENOME_RESULTS,1), label='Genome Fitness STD')
+    plt.plot(plot_data(GENOME_RESULTS,2), label='Genome Fitness STD')
     plt.ylabel("Fitness STD")
     plt.legend()
     plt.subplot(3,1,3)
-    plt.plot(plot_data(GENOME_RESULTS,2), label='Avg Genome balance')
-    plt.plot(plot_data(GENOME_RESULTS,3), label='Max Balance')
-    plt.plot(plot_data(GENOME_RESULTS,4), label='MinBalance')
+    plt.plot(plot_data(GENOME_RESULTS,3), label='Avg Genome balance')
+    plt.plot(plot_data(GENOME_RESULTS,4), label='Max Balance')
+    plt.plot(plot_data(GENOME_RESULTS,5), label='MinBalance')
     plt.xlabel("Generation")
     plt.ylabel("Avg Balance")
     plt.legend()
@@ -97,9 +106,12 @@ def test_best_network(config):
         winner = pickle.load(f)
     winner_net = neat.nn.FeedForwardNetwork.create(winner,config)
 
-    game = BlackJackGame()
-    for i in range(100):
-        game.play_hand(winner_net, DRAW_AI_GAME)
+    newGame = BlackJackGame()
+    for i in range(1000):
+        newGame.play_hand(winner_net, DRAW_AI_GAME)
+
+    temp_df = pd.DataFrame.from_dict(newGame.game.analysis_df)
+    temp_df.to_csv('winner_ai.csv',index=False)
 
 
 if __name__ == '__main__':
