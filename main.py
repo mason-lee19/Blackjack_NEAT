@@ -39,15 +39,15 @@ def eval_genomes(genomes, config):
         for i in range(GAMES_PER_CHILD):
             fitness += newGame.play_hand(net, DRAW_AI_GAME, AI_RUN)
 
-        #temp_df = pd.DataFrame.from_dict(newGame.game.analysis_df)
-        #results = pd.concat([results,temp_df],ignore_index=True)
+        temp_df = pd.DataFrame.from_dict(newGame.game.analysis_df)
+        results = pd.concat([results,temp_df],ignore_index=True)
 
         genome.fitness = fitness
 
         allGenomeFitness.append(genome.fitness)
         resultingBalance.append(newGame.game.player1.playerBalance)
     
-    #results.to_csv('output.csv',index=False)
+    results.to_csv('output.csv',index=False)
     
     genomeStd = np.std(allGenomeFitness)
     genomeAvg = sum(allGenomeFitness)/len(allGenomeFitness)
@@ -107,7 +107,7 @@ def test_best_network(config):
     winner_net = neat.nn.FeedForwardNetwork.create(winner,config)
 
     newGame = BlackJackGame()
-    for i in range(1000):
+    for i in range(50000):
         newGame.play_hand(winner_net, DRAW_AI_GAME)
 
     temp_df = pd.DataFrame.from_dict(newGame.game.analysis_df)

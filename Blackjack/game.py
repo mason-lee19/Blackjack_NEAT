@@ -32,6 +32,7 @@ class Game():
             'dealerCard5': [],
             'playerHandSum': [],
             'dealerHandSum': [],
+            'decision':[],
             'cardsLeft': [],
             'result': [],
         }
@@ -77,7 +78,17 @@ class Game():
         
         # AI move
         else:
-            inputs = (self.player1.handSum, self.dealer.handValues[0],self.betAmount)
+            hasUsableAce = False
+            if 11 in self.player1.handValues:
+                hasUsableAce = True
+            inputs = (self.player1.handSum, 
+                    hasUsableAce,
+                    len(self.player1.handValues), 
+                    self.player1.handValues[0],
+                    self.player1.handValues[1],
+                    self.dealer.handValues[0],
+                    self.betAmount)
+
             output = net.activate(inputs)
             decision = output.index(max(output))
             
@@ -103,7 +114,7 @@ class Game():
 
         self.update_stats(result, draw, ai)
 
-        self.add_results(result)
+        self.add_results(decision, result)
 
         self.player1.reset_hand()
         self.dealer.reset_hand()
@@ -115,7 +126,7 @@ class Game():
         else:
             return self.betAmount * 0.5
 
-    def add_results(self, result) -> None:
+    def add_results(self, decision, result) -> None:
         for i in range(5):
             player_column = 'playerCard' + str(i+1)
             dealer_column = 'dealerCard' + str(i+1)
@@ -130,6 +141,7 @@ class Game():
                 self.analysis_df[dealer_column].append(0)
         self.analysis_df['playerHandSum'].append(self.player1.handSum)
         self.analysis_df['dealerHandSum'].append(self.dealer.handSum)
+        self.analysis_df['decision'].append(decision)
         self.analysis_df['cardsLeft'].append(len(self.deck.cardStack))
         self.analysis_df['result'].append(result)
 
@@ -154,7 +166,18 @@ class Game():
         if draw: self.draw_game()
         if self.player1.check_ai_bust(): return 0
 
-        inputs = (self.player1.handSum, self.dealer.handValues[0], self.betAmount)
+        hasUsableAce = False
+        if 11 in self.player1.handValues:
+            hasUsableAce = True
+            
+        inputs = (self.player1.handSum, 
+                    hasUsableAce,
+                    len(self.player1.handValues),
+                    self.player1.handValues[0],
+                    self.player1.handValues[1],
+                    self.dealer.handValues[0],
+                    self.betAmount)
+    
         output = net.activate(inputs)
         return output.index(max(output))
     
