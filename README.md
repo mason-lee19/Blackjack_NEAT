@@ -14,5 +14,8 @@ For the AI I used a FeedForwardNetwork and used the players hand sum, dealers fi
 <br>For the fitness I tried utilizing just -1 for a loss and +1 for a win, but moved to be directly correlated with money lost and won. I wanted to incentivize double downs more and see if adding more parameters (like bet amount) would change the learning of the model.
 
 ## AI Results ##
-Training this AI seemed to stagnate fairly quickly. Currently there is no viable strategy that the AI has come up with that consistently make money. 
-The latest run can be seen in stats.png file. This came from the outputted stats from a ~80 generation run with the latest config and code. 
+After many tweaks to the NEAT configuration, I was able to get a NN that plays fairly good blackjack. Looking at the stats.png on average, each generation looses about 800 dollars for 100 games with a betting amount starting at 100 and adjusts as time goes on based on win loss ratio as explained in the AI details. I am happy with these results and will be adding analysis into the strategy by looking at output.csv. After finding a winner I had the that model play a large number of games to get data on the stategy the AI found.
+
+## Summary ##
+Overall I am happy with the results. I wanted to stay away from counting cards and found a strategy that rivals the average blackjack player. I believe the variablity of the game makes it difficult to find a consitently positive strategy.
+
