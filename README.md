@@ -1,6 +1,6 @@
 # NEAT-Blackjack AI
 
-![Blackjack AI]([https://your-image-url.com/your-image.png](https://github.com/mason-lee19/Blackjack_NEAT/blob/master/stats.png))
+![Blackjack AI](stats.png)
 
 ## Overview
 
