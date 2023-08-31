@@ -1,6 +1,6 @@
 # NEAT-Blackjack AI
 
-![Blackjack AI](https://your-image-url.com/your-image.png)
+![Blackjack AI]([https://your-image-url.com/your-image.png](https://github.com/mason-lee19/Blackjack_NEAT/blob/master/stats.png))
 
 ## Overview
 
@@ -17,6 +17,8 @@ This project demonstrates the application of NEAT (NeuroEvolution of Augmenting 
 
 
 ### Blackjack Analysis Folder
+
+Contains jupyter notebook and blackjack data from Kaggle that I used for my original analysis before jumping into NEAT AI training.
 
 ### Blackjack Folder
 
