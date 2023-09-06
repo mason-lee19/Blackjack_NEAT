@@ -34,6 +34,7 @@ class Game():
             'dealerHandSum': [],
             'decision':[],
             'cardsLeft': [],
+            'count':[],
             'result': [],
         }
 
@@ -49,8 +50,10 @@ class Game():
         Game result: -1 for a Loss, 1 for a win and 0 for a push
         """
 
-        self.deck.check_deck_size()
-        self.betAmount = self.startingBetAmount * ((self.playerWins+1)/(self.gamesPlayed+1))
+        self.deck.check_deck_size() 
+        #self.betAmount = round(self.startingBetAmount * ((self.playerWins+1)/(self.gamesPlayed+1))/5)*5
+        self.betAmount = self.startingBetAmount
+        fitness = 10 * ((self.playerWins+1)/(self.gamesPlayed+1))
 
         if draw:
             print(f'You have ${self.player1.playerBalance}')
@@ -87,11 +90,24 @@ class Game():
                     self.player1.handValues[0],
                     self.player1.handValues[1],
                     self.dealer.handValues[0],
-                    self.betAmount)
+                    self.betAmount,
+                    self.deck.count)
 
             output = net.activate(inputs)
             decision = output.index(max(output))
-            
+
+            if decision == 0 and len(self.player1.hand) == 2:
+                # Ai double down
+                self.handle_double_down(draw)
+            elif decision == 1:
+                # Ai Hit
+                while decision == 1:
+                    decision = self.handle_ai_hit(net,draw)
+            else:
+                # Ai Stands
+                pass
+
+            '''
             if self.player1.handSum < 12:
                 if output[0] < output[1]: decision = 0
                 else: decision = 1
@@ -102,7 +118,7 @@ class Game():
             elif decision == 1 or self.player1.handSum < 12:
                 while decision == 1 or self.player1.handSum < 12:
                     decision = self.handle_ai_hit(net,draw)
-                
+            '''
 
         # Dealer's move
         self.dealer.check_dealer_move()
@@ -118,14 +134,24 @@ class Game():
 
         self.player1.reset_hand()
         self.dealer.reset_hand()
-
+        '''
+        if result == 'Loss':
+            if decision == 0:
+                return -fitness * 1.5
+            else:
+                return fitness
+        elif result == 'Win':
+            if decision == 0:
+                return fitness * 2
+            else:
+                return fitness
+        else:
+            return fitness * 1.1
+        '''
         if result == 'Loss':
             return -self.betAmount
-        elif result == 'Win':
-            return self.betAmount
-        else:
-            return self.betAmount * 0.5
-
+        return self.betAmount
+            
     def add_results(self, decision, result) -> None:
         for i in range(5):
             player_column = 'playerCard' + str(i+1)
@@ -143,6 +169,7 @@ class Game():
         self.analysis_df['dealerHandSum'].append(self.dealer.handSum)
         self.analysis_df['decision'].append(decision)
         self.analysis_df['cardsLeft'].append(len(self.deck.cardStack))
+        self.analysis_df['count'].append(self.deck.count)
         self.analysis_df['result'].append(result)
 
     def handle_player_hit(self, dealer:bool, draw:bool) -> None:
@@ -176,7 +203,8 @@ class Game():
                     self.player1.handValues[0],
                     self.player1.handValues[1],
                     self.dealer.handValues[0],
-                    self.betAmount)
+                    self.betAmount,
+                    self.deck.count)
     
         output = net.activate(inputs)
         return output.index(max(output))

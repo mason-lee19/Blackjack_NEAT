@@ -7,6 +7,7 @@ class Deck():
         self.values: dict = {"Ace": 11, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "Jack": 10, "Queen": 10, "King": 10}
         self.cardStack: list = []
         self.numDecks: int = numDecks
+        self.deckCount: int = 0
         self.totalCards: int = numDecks * 52
         
         self.create_new_deck()
@@ -15,6 +16,7 @@ class Deck():
     def create_new_deck(self) -> None:
         ''''Create new deck'''
         self.cardStack = []
+        self.count = 0
         for i in range(self.numDecks):
             for rank in self.ranks:
                 for suit in self.suits:
@@ -28,6 +30,14 @@ class Deck():
     def deal_card(self) -> str:
         '''Deal card to player'''
         card = self.cardStack.pop()
+        # Keep track of count
+        # 2-6 = +1
+        # 7-9 = 0
+        # 10-11 = -1
+        if card[2] >= 10:
+            self.count-=1
+        elif card[2] <= 6:
+            self.count+=1
         return card
 
     def check_deck_size(self) -> None:

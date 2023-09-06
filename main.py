@@ -9,7 +9,7 @@ import pandas as pd
 STARTING_BALANCE = 10000
 NUMBER_OF_DECKS = 8
 BET_AMOUNT = 100
-GAMES_PER_CHILD = 100
+GAMES_PER_CHILD = 25
 
 # If you want the Game drawn when AI is playing
 DRAW_AI_GAME = False
@@ -60,7 +60,7 @@ def eval_genomes(genomes, config):
     plt.figure(figsize=(10,10))
     plt.subplot(3,1,1)
     plt.plot(plot_data(GENOME_RESULTS,0),label='Avg Genome Fitness')
-    plt.plot(plot_data(GENOME_RESULTS,1),label='Max Genome Fitness')
+    #plt.plot(plot_data(GENOME_RESULTS,1),label='Max Genome Fitness')
     plt.ylabel("Fitness")
     plt.title("Population Fitness Over Generations")
     plt.legend()
@@ -107,7 +107,7 @@ def test_best_network(config):
     winner_net = neat.nn.FeedForwardNetwork.create(winner,config)
 
     newGame = BlackJackGame()
-    for i in range(50000):
+    for i in range(100000):
         newGame.play_hand(winner_net, DRAW_AI_GAME)
 
     temp_df = pd.DataFrame.from_dict(newGame.game.analysis_df)
